@@ -8,11 +8,8 @@ Work in progress
 ### Run PostgreSQL + Open LDAP + Keycloak + Camunda
 
 <img width="50" src="https://www.postgresql.org/media/img/about/press/elephant.png"/>
-<span>&nbsp</span>
 <img height="50" src="https://dyltqmyl993wv.cloudfront.net/assets/stacks/openldap/img/openldap-stack-220x234.png"/>
-<span>&nbsp</span>
 <img height="50" src="https://www.keycloak.org/resources/images/keycloak_logo_200px.svg"/>
-<span>&nbsp</span>
 <img width="100" src="https://camunda.com/wp-content/uploads/2020/07/camunda-logo-social-update.jpg"/>
 
 ```shell
