@@ -1,12 +1,13 @@
 version: "3.9"
 
 networks:
-  m1-local-network:
-    name: m1-local-network
+  my-local-network:
+    name: my-local-network
 
-# This volume definition is necessary to ensure, that PostgreSQL will use the same docker volume if restarted.
 volumes:
   db:
+    driver: local
+  openldap:
     driver: local
 
 services:
@@ -20,7 +21,7 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - m1-local-network
+      - my-local-network
     volumes:
       - db:/var/lib/postgresql/data
       # Volume with init SQL scripts
@@ -28,6 +29,24 @@ services:
       # See: https://github.com/docker-library/postgres/blob/2c72165e4f9dc66a61998111f69b5eba0b6b71f4/9.5/docker-entrypoint.sh#L77
       # Note, that they are run olny once - when there is no database.
       - ./postgres-init:/docker-entrypoint-initdb.d
+
+  # Open LDAP
+  openldap:
+    image: bitnami/openldap:2.6.1-debian-10-r22
+    container_name: "ldap"
+    environment:
+      - LDAP_ROOT=dc=peacockelgap,dc=pl
+      - LDAP_ADMIN_USERNAME=admin
+      - LDAP_ADMIN_PASSWORD=admin
+      - LDAP_USERS=user1,user2
+      - LDAP_PASSWORDS=password1,password2
+    ports:
+      - "1389:1389"
+      - "1636:1636"
+    networks:
+      - my-local-network
+    volumes:
+      - openldap:/bitnami/openldap
 
   # Keycloak
   keycloak:
@@ -50,11 +69,13 @@ services:
     ports:
       - "8081:8080"
     networks:
-      - m1-local-network
+      - my-local-network
     # Should run only if:
     # 1) Database (PostgreSQL) is started
     depends_on:
       postgres:
+        condition: service_started
+      openldap:
         condition: service_started
 
   # Camunda
@@ -82,7 +103,7 @@ services:
     ports:
       - "8082:8080"
     networks:
-      - m1-local-network
+      - my-local-network
     # Should run only if:
     # 1) Database (PostgreSQL) is started
     # 2) Authentication layer (Keycloak) is started
