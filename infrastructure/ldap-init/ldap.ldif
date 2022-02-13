@@ -1,0 +1,57 @@
+version: 1
+
+dn: dc=peacockelgap,dc=pl
+objectClass: dcObject
+objectClass: organization
+dc: peacockelgap
+o: dev
+
+dn: ou=users,dc=peacockelgap,dc=pl
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=groups,dc=peacockelgap,dc=pl
+objectClass: organizationalUnit
+ou: groups
+
+dn: uid=camunda_admin_uid,ou=users,dc=peacockelgap,dc=pl
+objectClass: inetOrgPerson
+cn: camunda_admin_cn
+sn: camunda_admin_sn
+uid: camunda_admin_uid
+
+dn: uid=camunda_user_1_uid,ou=users,dc=peacockelgap,dc=pl
+objectClass: inetOrgPerson
+cn: camunda_user_1_cn
+sn: camunda_user_1_sn
+uid: camunda_user_1_uid
+
+dn: uid=camunda_user_2_uid,ou=users,dc=peacockelgap,dc=pl
+objectClass: inetOrgPerson
+cn: camunda_user_2_cn
+sn: camunda_user_2_sn
+uid: camunda_user_2_uid
+
+dn: uid=general_user_1_uid,ou=users,dc=peacockelgap,dc=pl
+objectClass: inetOrgPerson
+cn: general_user_1_cn
+sn: general_user_1_sn
+uid: general_user_1_uid
+
+dn: uid=general_user_2_uid,ou=users,dc=peacockelgap,dc=pl
+objectClass: inetOrgPerson
+cn: general_user_2_cn
+sn: general_user_2_sn
+uid: general_user_2_uid
+
+dn: cn=Camunda Users,ou=groups,dc=peacockelgap,dc=pl
+objectClass: groupOfNames
+cn: Camunda Users
+member: uid=camunda_user_1_uid,ou=users,dc=peacockelgap,dc=pl
+member: uid=camunda_user_2_uid,ou=users,dc=peacockelgap,dc=pl
+
+dn: cn=Camunda Admins,ou=groups,dc=peacockelgap,dc=pl
+objectClass: groupOfNames
+cn: Camunda Admins
+member: uid=camunda_admin_uid,ou=users,dc=peacockelgap,dc=pl
+
