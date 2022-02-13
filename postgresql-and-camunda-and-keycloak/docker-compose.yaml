@@ -1,0 +1,93 @@
+version: "3.9"
+
+networks:
+  m1-local-network:
+    name: m1-local-network
+
+# This volume definition is necessary to ensure, that PostgreSQL will use the same docker volume if restarted.
+volumes:
+  db:
+    driver: local
+
+services:
+  # PostgreSQL
+  postgres:
+    image: postgres:13.6-alpine3.15
+    container_name: "postgres"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - m1-local-network
+    volumes:
+      - db:/var/lib/postgresql/data
+      # Volume with init SQL scripts
+      # Note, that scripts in this directory are run in alphabetical order
+      # See: https://github.com/docker-library/postgres/blob/2c72165e4f9dc66a61998111f69b5eba0b6b71f4/9.5/docker-entrypoint.sh#L77
+      # Note, that they are run olny once - when there is no database.
+      - ./postgres-init:/docker-entrypoint-initdb.d
+
+  # Keycloak
+  keycloak:
+    image: jboss/keycloak:15.0.2
+    container_name: "keycloak"
+    environment:
+      # Keycloak admin
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      # Database
+      DB_VENDOR: postgres
+      # This will work if you are using Docker Desktop on Windows (and probably also on Mac)
+      DB_ADDR: host.docker.internal
+      # If you are using different docker implementation, you have to specify your machine IP (or name) here
+      # DB_ADDR: <your-machine-IP-or-name>
+      DB_DATABASE: postgres
+      DB_SCHEMA: keycloak_schema
+      DB_USER: keycloak_user
+      DB_PASSWORD: keycloak_user_password
+    ports:
+      - "8081:8080"
+    networks:
+      - m1-local-network
+    # Should run only if:
+    # 1) Database (PostgreSQL) is started
+    depends_on:
+      postgres:
+        condition: service_started
+
+  # Camunda
+  camunda:
+    image: camunda/camunda-bpm-platform:run-7.16.0
+    container_name: "camunda"
+    environment:
+      DB_DRIVER: org.postgresql.Driver
+      # Note schema at the end of URL
+      # This will work if you are using Docker Desktop on Windows (and probably also on Mac)
+      DB_URL: jdbc:postgresql://host.docker.internal:5432/postgres?currentSchema=camunda_schema
+      # If you are using different docker implementation, you have to specify your machine IP (or name) here
+      # DB_URL: jdbc:postgresql://<your-machine-IP-or-name>:5432/postgres?currentSchema=camunda_schema
+      DB_USERNAME: camunda_user
+      DB_PASSWORD: camunda_user_password
+      # Ensure that database is ready
+      # This will work if you are using Docker Desktop on Windows (and probably also on Mac)
+      WAIT_FOR: host.docker.internal:5432
+      # If you are using different docker implementation, you have to specify your machine IP (or name) here
+      # WAIT_FOR: <your-machine-IP-or-name>:5432
+      WAIT_FOR_TIMEOUT: 60
+      # This one is important - prevents Camunda to initialise database
+      SKIP_DB_CONFIG: true
+      SPRING_CAMUNDA_BPM_WEBAPP_INDEX-REDIRECT-ENABLED: true
+    ports:
+      - "8082:8080"
+    networks:
+      - m1-local-network
+    # Should run only if:
+    # 1) Database (PostgreSQL) is started
+    # 2) Authentication layer (Keycloak) is started
+    depends_on:
+      postgres:
+        condition: service_started
+      keycloak:
+        condition: service_started
