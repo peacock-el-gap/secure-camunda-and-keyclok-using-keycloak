@@ -28,4 +28,8 @@ docker-compose -f ./infrastructure/docker-compose.yaml down
 ## Configure Keycloak
 Name `host.docker.internal` in connection URL will work if you are using Docker Desktop on Windows (and probably also on Mac).
 If you are using different docker implementation, you have to specify your machine IP (or name) here.
-![img.png](img.png)
+![img.png](img_LDAP_configuration.png)
+
+We can enable authomatic synchronization.
+![img_1.png](img_LDAP_synchronization.png)
+Note, that periods are in seconds - do not synchronize to frequently ;-).
